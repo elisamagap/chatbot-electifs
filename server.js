@@ -15,7 +15,7 @@ app.post("/api/chat", async (req, res) => {
   }));
 
   const body = {
-    system_instruction: { parts: [{ text: system }] },
+    systemInstruction: { parts: [{ text: system }] },
     contents: geminiMessages,
     generationConfig: { maxOutputTokens: 800, temperature: 0.7 }
   };
