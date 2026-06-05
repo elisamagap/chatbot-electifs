@@ -1,0 +1,14 @@
+{
+  "name": "chatbot-electifs-centrale",
+  "version": "1.0.0",
+  "description": "Chatbot guide des électifs de Centrale Lille",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "node-fetch": "^3.3.2"
+  }
+}
