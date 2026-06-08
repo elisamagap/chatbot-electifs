@@ -1,1 +1,406 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Guide des Électifs — Centrale Lille</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display&display=swap');
 
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --blue-dark: #1A3A6B;
+    --blue-mid:  #2563EB;
+    --blue-light:#DBEAFE;
+    --blue-pale: #EFF6FF;
+    --yellow:    #FBBF24;
+    --yellow-light: #FEF3C7;
+    --white:     #FFFFFF;
+    --gray-100:  #F1F5F9;
+    --gray-200:  #E2E8F0;
+    --gray-400:  #94A3B8;
+    --gray-700:  #334155;
+    --radius:    14px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--blue-pale);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  /* ---- HEADER ---- */
+  .page-header {
+    width: 100%;
+    max-width: 680px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+  .logo {
+    width: 48px;
+    height: 48px;
+    background: var(--blue-dark);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .logo svg { width: 26px; height: 26px; }
+  .page-header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    color: var(--blue-dark);
+    line-height: 1.2;
+  }
+  .page-header p {
+    font-size: 12px;
+    color: var(--gray-400);
+    margin-top: 2px;
+  }
+
+  /* ---- CHAT CONTAINER ---- */
+  #chat {
+    width: 100%;
+    max-width: 680px;
+    background: var(--white);
+    border-radius: var(--radius);
+    border: 1.5px solid var(--blue-light);
+    display: flex;
+    flex-direction: column;
+    height: 520px;
+    box-shadow: 0 4px 24px rgba(37,99,235,0.08);
+    overflow: hidden;
+  }
+
+  /* ---- MESSAGES ---- */
+  #msgs {
+    flex: 1;
+    overflow-y: auto;
+    padding: 18px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    scroll-behavior: smooth;
+  }
+  #msgs::-webkit-scrollbar { width: 4px; }
+  #msgs::-webkit-scrollbar-thumb { background: var(--blue-light); border-radius: 4px; }
+
+  .msg { display: flex; gap: 8px; max-width: 86%; }
+  .msg.user { align-self: flex-end; flex-direction: row-reverse; }
+  .msg.bot  { align-self: flex-start; }
+
+  .avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 2px;
+  }
+  .msg.bot .avatar  { background: var(--blue-dark); }
+  .msg.user .avatar { background: var(--yellow); }
+
+  .bubble {
+    padding: 10px 14px;
+    border-radius: 16px;
+    font-size: 13.5px;
+    line-height: 1.65;
+  }
+  .msg.bot .bubble {
+    background: var(--blue-pale);
+    color: var(--gray-700);
+    border: 1px solid var(--blue-light);
+    border-bottom-left-radius: 4px;
+  }
+  .msg.user .bubble {
+    background: var(--blue-dark);
+    color: var(--white);
+    border-bottom-right-radius: 4px;
+  }
+  .bubble strong { color: var(--blue-mid); }
+  .msg.user .bubble strong { color: var(--yellow); }
+
+  /* typing dots */
+  .typing { display: flex; gap: 5px; align-items: center; padding: 4px 2px; }
+  .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--blue-mid); opacity: 0.5;
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+  .dot:nth-child(2){animation-delay:.2s}
+  .dot:nth-child(3){animation-delay:.4s}
+  @keyframes pulse{0%,60%,100%{transform:scale(1);opacity:.5}30%{transform:scale(1.4);opacity:1}}
+
+  /* ---- CHIPS ---- */
+  #chips {
+    padding: 0 16px 10px;
+    display: flex; flex-wrap: wrap; gap: 6px;
+  }
+  .chip {
+    font-size: 12px;
+    padding: 5px 11px;
+    border-radius: 20px;
+    border: 1px solid var(--blue-light);
+    background: var(--white);
+    color: var(--blue-mid);
+    cursor: pointer;
+    transition: all .15s;
+    white-space: nowrap;
+  }
+  .chip:hover { background: var(--blue-pale); border-color: var(--blue-mid); }
+
+  /* ---- INPUT ---- */
+  #input-row {
+    padding: 10px 14px 14px;
+    display: flex; gap: 8px;
+    border-top: 1px solid var(--blue-light);
+    background: var(--white);
+  }
+  #inp {
+    flex: 1;
+    padding: 9px 14px;
+    border-radius: 22px;
+    border: 1.5px solid var(--blue-light);
+    font-size: 13.5px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--gray-700);
+    background: var(--blue-pale);
+    outline: none;
+    transition: border-color .2s;
+  }
+  #inp:focus { border-color: var(--blue-mid); background: var(--white); }
+  #sbtn {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: var(--blue-dark);
+    border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .15s, transform .1s;
+    flex-shrink: 0;
+  }
+  #sbtn:hover  { background: var(--blue-mid); }
+  #sbtn:active { transform: scale(.95); }
+  #sbtn:disabled { background: var(--gray-200); cursor: not-allowed; }
+
+  /* ---- FOOTER ---- */
+  .foot {
+    font-size: 11px; color: var(--gray-400);
+    text-align: center; margin-top: 10px;
+  }
+  .foot a { color: var(--blue-mid); text-decoration: none; }
+
+  /* ---- ERROR BANNER ---- */
+  #err-banner {
+    display: none;
+    background: #FEF3C7;
+    border: 1px solid #FBBF24;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 12px;
+    color: #92400E;
+    margin: 0 16px 8px;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="logo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+      <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+    </svg>
+  </div>
+  <div>
+    <h1>Guide des Électifs</h1>
+    <p>École Centrale de Lille · Avis d'étudiants S6–S8</p>
+  </div>
+</div>
+
+<div id="chat">
+  <div id="msgs">
+    <div class="msg bot">
+      <div class="avatar">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+      </div>
+      <div class="bubble">
+        Bonjour ! Je suis le guide des électifs de Centrale Lille, basé sur les retours anonymisés de tes camarades. 👋<br><br>
+        Dis-moi ton domaine d'intérêt, ton niveau (G1/G2) ou le semestre visé, et je t'aide à choisir !
+      </div>
+    </div>
+  </div>
+
+  <div id="chips">
+    <span class="chip" onclick="sc(this.textContent)">IA &amp; Machine Learning</span>
+    <span class="chip" onclick="sc(this.textContent)">Mécanique &amp; CAO</span>
+    <span class="chip" onclick="sc(this.textContent)">Énergie &amp; Électrique</span>
+    <span class="chip" onclick="sc(this.textContent)">Programmation</span>
+    <span class="chip" onclick="sc(this.textContent)">Électifs faciles à valider</span>
+    <span class="chip" onclick="sc(this.textContent)">Domaine biomédical</span>
+    <span class="chip" onclick="sc(this.textContent)">Équivalences universités brésiliennes</span>
+  </div>
+
+  <div id="err-banner" id="err">⚠️ Erreur de connexion. Vérifie que le serveur est bien lancé.</div>
+
+  <div id="input-row">
+    <input id="inp" type="text" placeholder="Pose ta question sur un électif..." maxlength="400"/>
+    <button id="sbtn" onclick="hs()" aria-label="Envoyer">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    </button>
+  </div>
+</div>
+
+<p class="foot">Données anonymisées · Centrale Lille · <a href="#">En savoir plus</a></p>
+
+<script>
+const API_URL = "/api/chat"; // ton serveur proxy
+
+const FB = `AET - Approche énergétique et transmission de puissance: Projet d'éolienne verticale, mélange mécanique, CAO, aérodynamique et fabrication (impression 3D). Profs très appréciés. Charge élevée mais satisfaisante. Note moyenne: 4/5.
+IAS - Intelligence artificielle et santé: Mélange théorie et pratique IA appliquée à la santé. Projet d'optimisation (ex: planification de gardes). Utile de connaître Git et Python. Note basée sur la soutenance finale. Note moyenne: 4.5/5.
+DLE - DeepLearning: Réseaux de neurones en pratique. Projet final sur thème libre. Facile à valider avec bon travail. Cours magistraux + projet. Note moyenne: 4.5/5.
+BFC - Biomimetic flow control: Aérodynamique et CAO/impression 3D. Amélioration d'aérodynamique de véhicule. Base en mécanique des fluides recommandée. Note moyenne: 4.5/5.
+ANA - Apprentissage par naufrage: Prototypes de survie (pompe, sextant, turbine, purificateur). Très pratique, très satisfaisant. Note moyenne: 5/5.
+FPD - Fabrication de pièces par déformation plastique: Halfbike de A à Z avec CAO, découpe, pliage, soudure. Profs incroyables. Note moyenne: 5/5.
+MSV - La mécanique au service du vivant: CAO pour créer une prothèse avec impression 3D. Excellent pour le biomédical. Note moyenne: 4.5/5.
+SPS - Sport et Sciences: Capteurs et Arduino appliqués au rugby. Apprentissage varié. Pas d'absence tolérée. Note moyenne: 4.5/5.
+BIM - Biomécanique: Dispositifs médicaux pour entraînement chirurgical. Visite au CHU. Idéal pour le biomédical. Note moyenne: 4/5.
+SSC - The sound of Science: Acoustique. Multiples évaluations, profs sympa, visite à l'Orchestre de Lille et aux Pays-Bas. Note moyenne: 4.5/5.
+AET - voir ci-dessus. Note moyenne: 4/5.
+SMA - Science des matériaux: Métaux et matériaux. TPs en fonderie. Partiel avec documents autorisés. Note moyenne: 4/5.
+MAC - Modélisation aléatoire et calcul scientifique: Probabilités et équations différentielles avec Python. Pour les amateurs de maths. Note moyenne: 4/5.
+SIN - Systèmes d'information: UML avec Papyrus et SQL. Tous les TPs évalués. Bonne initiation à la modélisation de données. Note moyenne: 4/5.
+TCM - Transferts de chaleur et de matière: Thermodynamique, suite de la prépa. Évaluations hebdomadaires. Note moyenne: 4/5.
+TFL - Transport de fluide: Mécanique des fluides. Partiel avec sujets similaires chaque année. Bonne équipe pédagogique. Note moyenne: 4/5.
+SDE - Smart Decision: Excel et modélisation. Très facile d'avoir une bonne note. Prof particulier mais sympathique. Note moyenne: 4/5.
+EPO - Évaluation des performances et optimisation avancée: Chaînes de Markov et modélisation de production. Facile à valider. Note moyenne: 4.5/5.
+PRF - Prototypage rapide et fabrication additive: Construction d'une imprimante 3D. Projet concret. Présence importante. Note moyenne: 4/5.
+EHE - Éco-conception pour l'habitat à énergie positive: ACV et réglementation environnementale pour bâtiments. Pour l'éco-design. Note moyenne: 4/5.
+MCS - Modélisation et commande de systèmes: Asservissement, algèbre linéaire, robotique, MATLAB. Excellent pour les PSI. Note moyenne: 3.5/5.
+POO - Programmation orientée objet: Java. Évaluation orale avec programmation en direct. Autonome, demande de la pratique. Note moyenne: 3.5/5.
+AER - Aérodynamique: Mécanique des fluides appliquée. Demande du travail (TEA, TPs). Pour les passionnés d'aviation. Note moyenne: 3.5/5.
+ASE - Architecture des systèmes embarqués: 4 parties (automatisme, Arduino, trains, FPGA). Beaucoup de travail mais riche en apprentissages. Note moyenne: 3.5/5.
+MMO - Modélisation pour le management des organisations: Management, logistique, sociologie, modélisation. Travail modéré. Note moyenne: 3.5/5.
+PAV - Physique avancée: Physique quantique, électromagnétisme et piézoélectrique. En anglais. DM + partiel. Note moyenne: 3.5/5.
+SET - Systèmes électroniques pour les télécoms: Construction d'une radio de A à Z. TPs évalués chaque semaine. Présence requise. Note moyenne: 3.5/5.
+EHD - Electricité pour l'habitat durable: Électronique de puissance. Bien organisé. Projet final. Note moyenne: 3.5/5.
+OAP - Optimisation et Analyse Prescriptive: Techniques d'optimisation avec contraintes. En anglais. Partiel obligatoire pour compter les TPs. Note moyenne: 3/5.
+CSM - CAO des systèmes mécaniques: Onshape de zéro. Projet de modélisation mécanique. Très formateur pour la CAO. Évaluation exigeante. Note moyenne: 3/5.
+TER - Transition énergétique et réseau électrique: Théorique, énergies renouvelables. Nécessite base en systèmes électriques. Note moyenne: 3/5.
+EER - Energie électrique pour le renouvelable: Triphasé, classe inversée, nombreux TEAs. Travail continu requis. Note moyenne: 3/5.
+BIO - Bioéconomie: Tranquille. Projet sur économie verte. Peu d'exigences. Bon pour semestre plus léger. Note moyenne: 3.5/5.
+CO4 - Construction 4.0: BIM, lean construction, impression 3D dans la construction. Rapport de groupe. Très facile à valider. Note moyenne: 3.5/5.
+GTV - Géotechnique et tunnel pour la ville intelligente: Très facile à valider. Rapport de groupe. Conférences intéressantes sur la construction. Note moyenne: 3.5/5.
+CSH - Création de startup de haute technologie: 90% benchmark et pitch. Peu de contenu technique approfondi. Facile à valider. Note moyenne: 3.5/5.
+CAD - Conception architecturale et développement durable: Maquette architecturale en groupe. Tranquille. Visite au Louvre-Lens. Peu technique. Note moyenne: 3.5/5.
+FMM - Full metal module: Métallurgie et fonderie. TPs de 4h. Redondant avec SMA. Facile à valider. Note moyenne: 3.5/5.
+RED - Reverse engineering & design thinking: Design thinking et CAO. Projet sur un objet choisi. Profs bienveillants. Note variable. Note moyenne: 2.5/5.
+`;
+
+const SYS = `Tu es un assistant spécialisé dans l'aide aux étudiants pour choisir leurs électifs à l'École Centrale de Lille.
+
+Tu as accès aux retours anonymisés d'étudiants sur les électifs suivants :
+${FB}
+
+RÈGLES IMPORTANTES :
+1. Ne cite jamais les noms d'étudiants ni ne fais de commentaires négatifs ciblés sur des professeurs
+2. Ne reproduis jamais les commentaires irrespectueux ou très négatifs
+3. Présente un résumé équilibré et constructif
+4. Réponds toujours en français
+5. Sois direct et utile — donne des recommandations concrètes
+6. Pour chaque électif, mentionne : ce qu'on apprend, charge de travail, note moyenne, profil idéal
+7. Si on te parle d'équivalences avec des universités brésiliennes (USP, UnB, UFMG…), suggère les contenus similaires et précise que l'étudiant doit vérifier auprès de sa coordination
+8. Maximum 230 mots par réponse
+9. Utilise du **gras** pour les noms d'électifs`;
+
+let hist = [];
+let busy = false;
+
+function fmt(t) {
+  return t
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n/g, '<br>');
+}
+
+function botAvatar() {
+  const a = document.createElement("div");
+  a.className = "avatar";
+  a.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>';
+  return a;
+}
+
+function addMsg(text, isUser) {
+  const c = document.getElementById("msgs");
+  const d = document.createElement("div");
+  d.className = "msg " + (isUser ? "user" : "bot");
+  if (!isUser) d.appendChild(botAvatar());
+  const b = document.createElement("div");
+  b.className = "bubble";
+  b.innerHTML = fmt(text);
+  d.appendChild(b);
+  c.appendChild(d);
+  c.scrollTop = c.scrollHeight;
+}
+
+function addTyping() {
+  const c = document.getElementById("msgs");
+  const d = document.createElement("div");
+  d.className = "msg bot"; d.id = "ty";
+  d.appendChild(botAvatar());
+  const b = document.createElement("div");
+  b.className = "bubble";
+  b.innerHTML = '<div class="typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
+  d.appendChild(b);
+  c.appendChild(d);
+  c.scrollTop = c.scrollHeight;
+}
+
+function rmTyping() { const t = document.getElementById("ty"); if (t) t.remove(); }
+
+async function callAPI(msg) {
+  hist.push({ role: "user", content: msg });
+  const r = await fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ messages: hist, system: SYS })
+  });
+  if (!r.ok) throw new Error("HTTP " + r.status);
+  const d = await r.json();
+  const text = d.content?.map(b => b.text || "").join("") || d.reply || "";
+  hist.push({ role: "assistant", content: text });
+  return text;
+}
+
+async function hs() {
+  if (busy) return;
+  const inp = document.getElementById("inp");
+  const txt = inp.value.trim();
+  if (!txt) return;
+  inp.value = "";
+  document.getElementById("chips").style.display = "none";
+  document.getElementById("err-banner").style.display = "none";
+  addMsg(txt, true);
+  busy = true;
+  document.getElementById("sbtn").disabled = true;
+  addTyping();
+  try {
+    const rep = await callAPI(txt);
+    rmTyping();
+    addMsg(rep, false);
+  } catch (e) {
+    rmTyping();
+    document.getElementById("err-banner").style.display = "block";
+  }
+  busy = false;
+  document.getElementById("sbtn").disabled = false;
+}
+
+function sc(t) { document.getElementById("inp").value = t; hs(); }
+document.getElementById("inp").addEventListener("keydown", e => { if (e.key === "Enter") hs(); });
+</script>
+</body>
+</html>
